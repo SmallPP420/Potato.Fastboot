@@ -19,8 +19,8 @@ namespace SharpBoot
     /// </remarks>
     public class Fastboot
     {
-        private int USB_VID { get; }
-        private int USB_PID { get; }
+        private static int USB_VID { get; }
+        private static int USB_PID { get; }
 
         private const int HEADER_SIZE = 4;
         private const int BLOCK_SIZE = 512 * 1024; // 512 KB
