@@ -19,9 +19,8 @@ namespace SharpBoot
     /// </remarks>
     public class Fastboot
     {
-        private const int USB_VID = 0x18D1; // MediaTek Fastboot
-        private const int USB_PID = 0xD00D; //        Info
-        // Change Above If Needed.
+        private int USB_VID { get; }
+        private int USB_PID { get; }
 
         private const int HEADER_SIZE = 4;
         private const int BLOCK_SIZE = 512 * 1024; // 512 KB
@@ -61,14 +60,18 @@ namespace SharpBoot
             }
         }
 
-        public Fastboot(string serial)
+        public Fastboot(string serial, int vendorID, int productID)
         {
             targetSerialNumber = serial;
+            USB_VID = vendorID;
+            USB_PID = productID;
         }
 
-        public Fastboot()
+        public Fastboot(int vendorID, int productID)
         {
             targetSerialNumber = null;
+            USB_VID = vendorID;
+            USB_PID = productID;
         }
 
         private Status GetStatusFromString(string header)
@@ -315,6 +318,9 @@ namespace SharpBoot
             return Command(Encoding.ASCII.GetBytes("continue"));
         }
 
+        /// <summary>
+        /// Sends an oem command to the device
+        /// </summary>
         public Response SendOemCommand(string command)
         {
             return Command(Encoding.ASCII.GetBytes($"oem {command}"));
@@ -322,10 +328,11 @@ namespace SharpBoot
 
 
         /// <summary>
-        /// Upload data from file to device's buffer and flash
+        /// Upload data from file to device's buffer and flashes it
         /// </summary>
         /// <param name="path">Path to file</param>
-        public Response Flash(string path,string partition)
+        /// <param name="partition">Target partition to flash</param>
+        public Response Flash(string path, string partition)
         {
             using (var stream = new FileStream(path, FileMode.Open))
             {
@@ -335,7 +342,7 @@ namespace SharpBoot
         }
 
         /// <summary>
-        /// Upload data from file to device's buffer and boot
+        /// Upload data from file to the device's buffer and boots it
         /// </summary>
         /// <param name="path">Path to file</param>
         public Response Boot(string path)
@@ -398,7 +405,7 @@ namespace SharpBoot
                 case RebootOptions.System:
                     return Command(Encoding.ASCII.GetBytes("reboot"));
                 default:
-                    throw new Exception("No reboot option provided or a device hasnt been connected");
+                    throw new Exception("No reboot option provided or a device hasn't been connected");
             }
         }
     }
